@@ -9,8 +9,8 @@ import numpy as np
 import os
 import math
 
-from fpgaconvnet_optimiser.models.modules import Fork
-from fpgaconvnet_optimiser.models.layers import MultiPortLayer
+from fpgaconvnet.models.modules import Fork
+from fpgaconvnet.models.layers import MultiPortLayer
 
 class SplitLayer(MultiPortLayer):
     def __init__(

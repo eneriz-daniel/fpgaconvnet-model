@@ -28,6 +28,7 @@ from fpgaconvnet_optimiser.models.layers import SqueezeLayer
 
 class Network():
 
+<<<<<<< HEAD
     def __init__(self, name, network_path, batch_size=1, freq=125, reconf_time=0.0, data_width=16, weight_width=8, acc_width=30, fuse_bn=True, rsc_allocation=1.0):
 
         # empty transforms configuration
@@ -35,6 +36,9 @@ class Network():
 
         ## percentage resource allocation
         self.rsc_allocation = rsc_allocation
+=======
+    def __init__(self, name, network_path, batch_size=1, freq=125, reconf_time=0.0, data_width=16, weight_width=8, acc_width=30, fuse_bn=True):
+>>>>>>> 43f9572... initial commit
 
         ## bitwidths
         self.data_width     = data_width
@@ -91,6 +95,7 @@ class Network():
         # update partitions
         self.update_partitions()
 
+<<<<<<< HEAD
     from fpgaconvnet_optimiser.transforms.partition import check_parallel_block
     from fpgaconvnet_optimiser.transforms.partition import get_all_horizontal_splits
     from fpgaconvnet_optimiser.transforms.partition import get_all_vertical_splits
@@ -108,6 +113,8 @@ class Network():
     from fpgaconvnet_optimiser.transforms.partition import merge_complete
     from fpgaconvnet_optimiser.transforms.partition import apply_random_partition
 
+=======
+>>>>>>> 43f9572... initial commit
     from fpgaconvnet_optimiser.models.network.report import create_report
 
     from fpgaconvnet_optimiser.models.network.scheduler import get_partition_order

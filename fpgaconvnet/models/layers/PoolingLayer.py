@@ -4,9 +4,9 @@ import numpy as np
 import pydot
 from typing import Union, List
 
-from fpgaconvnet_optimiser.models.modules import SlidingWindow
-from fpgaconvnet_optimiser.models.modules import Pool
-from fpgaconvnet_optimiser.models.layers import Layer
+from fpgaconvnet.models.modules import SlidingWindow
+from fpgaconvnet.models.modules import Pool
+from fpgaconvnet.models.layers import Layer
 
 class PoolingLayer(Layer):
 

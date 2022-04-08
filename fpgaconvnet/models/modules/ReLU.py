@@ -7,7 +7,7 @@ import math
 import os
 from dataclasses import dataclass, field
 
-from fpgaconvnet_optimiser.models.modules import Module
+from fpgaconvnet.models.modules import Module
 
 @dataclass
 class ReLU(Module):

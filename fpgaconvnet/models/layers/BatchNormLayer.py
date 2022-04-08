@@ -3,10 +3,10 @@ import math
 import tempfile
 import pydot
 
-from fpgaconvnet_optimiser.tools.resource_model import bram_memory_resource_model
+from fpgaconvnet.tools.resource_model import bram_memory_resource_model
 
-from fpgaconvnet_optimiser.models.modules import BatchNorm
-from fpgaconvnet_optimiser.models.layers import Layer
+from fpgaconvnet.models.modules import BatchNorm
+from fpgaconvnet.models.layers import Layer
 
 class BatchNormLayer(Layer):
     def __init__(

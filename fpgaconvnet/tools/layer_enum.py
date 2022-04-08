@@ -1,5 +1,5 @@
 from enum import Enum
-import fpgaconvnet_optimiser.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
+import fpgaconvnet.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
 
 # Get enumeration from:
 #   https://github.com/BVLC/caffe/blob/master/src/caffe/proto/caffe.proto

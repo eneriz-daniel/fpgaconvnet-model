@@ -5,10 +5,10 @@ from google.protobuf.json_format import MessageToDict
 import numpy as np
 from dataclasses import dataclass, field
 
-from fpgaconvnet_optimiser.models.layers.utils import get_factors
-from fpgaconvnet_optimiser.models.layers.utils import balance_module_rates
+from fpgaconvnet.models.layers.utils import get_factors
+from fpgaconvnet.models.layers.utils import balance_module_rates
 
-import fpgaconvnet_optimiser.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
+import fpgaconvnet.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
 
 @dataclass
 class MultiPortLayer:

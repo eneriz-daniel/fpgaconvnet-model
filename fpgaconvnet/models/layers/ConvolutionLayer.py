@@ -4,17 +4,17 @@ import pydot
 import torch
 from typing import Union, List
 
-from fpgaconvnet_optimiser.models.layers.utils import get_factors
+from fpgaconvnet.models.layers.utils import get_factors
 
-from fpgaconvnet_optimiser.tools.resource_model import bram_memory_resource_model
+from fpgaconvnet.tools.resource_model import bram_memory_resource_model
 
-from fpgaconvnet_optimiser.models.modules import SlidingWindow
-from fpgaconvnet_optimiser.models.modules import Conv
-from fpgaconvnet_optimiser.models.modules import Fork
-from fpgaconvnet_optimiser.models.modules import Accum
-from fpgaconvnet_optimiser.models.modules import Glue
-from fpgaconvnet_optimiser.models.modules import Bias
-from fpgaconvnet_optimiser.models.layers import Layer
+from fpgaconvnet.models.modules import SlidingWindow
+from fpgaconvnet.models.modules import Conv
+from fpgaconvnet.models.modules import Fork
+from fpgaconvnet.models.modules import Accum
+from fpgaconvnet.models.modules import Glue
+from fpgaconvnet.models.modules import Bias
+from fpgaconvnet.models.layers import Layer
 
 class ConvolutionLayer(Layer):
 

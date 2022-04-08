@@ -16,8 +16,8 @@ import sys
 from typing import Union, List
 from dataclasses import dataclass, field
 
-from fpgaconvnet_optimiser.models.modules import Module
-from fpgaconvnet_optimiser.tools.resource_model import bram_memory_resource_model, bram_stream_resource_model
+from fpgaconvnet.models.modules import Module
+from fpgaconvnet.tools.resource_model import bram_memory_resource_model, bram_stream_resource_model
 
 @dataclass
 class SlidingWindow(Module):

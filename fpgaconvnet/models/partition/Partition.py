@@ -1,6 +1,6 @@
 import pydot
-import fpgaconvnet_optimiser.tools.graphs as graphs
-from fpgaconvnet_optimiser.tools.layer_enum import LAYER_TYPE
+import fpgaconvnet.tools.graphs as graphs
+from fpgaconvnet.tools.layer_enum import LAYER_TYPE
 
 class Partition():
 
@@ -15,7 +15,8 @@ class Partition():
             wr_factor=1,
             data_width=16,
             weight_width=8,
-            acc_width=30
+            acc_width=30,
+            port_width=64
         ):
 
         ## graph for partition
@@ -40,6 +41,9 @@ class Partition():
 
         ## bitwidths (TODO: add as parameters)
         self.port_width     = 64
+
+        ## bitwidths
+        self.port_width     = port_width
         self.data_width     = data_width
         self.weight_width   = weight_width
         self.acc_width      = acc_width
@@ -49,36 +53,37 @@ class Partition():
         self.max_streams_out    = self.ports_out*int(self.port_width/self.data_width)
 
     ## fine transform
-    from fpgaconvnet_optimiser.transforms.fine import apply_random_fine_layer
-    from fpgaconvnet_optimiser.transforms.fine import apply_complete_fine
+    from fpgaconvnet.transforms.fine import apply_random_fine_layer
+    from fpgaconvnet.transforms.fine import apply_complete_fine
 
     ## weights reloading transform
-    from fpgaconvnet_optimiser.transforms.weights_reloading import get_wr_layer
-    from fpgaconvnet_optimiser.transforms.weights_reloading import get_weights_reloading_factors
-    from fpgaconvnet_optimiser.transforms.weights_reloading import apply_random_weights_reloading
-    from fpgaconvnet_optimiser.transforms.weights_reloading import apply_max_weights_reloading
-    from fpgaconvnet_optimiser.transforms.weights_reloading import remove_weights_reloading_transform
-    from fpgaconvnet_optimiser.transforms.weights_reloading import apply_weights_reloading_transform
+    from fpgaconvnet.transforms.weights_reloading import get_wr_layer
+    from fpgaconvnet.transforms.weights_reloading import get_weights_reloading_factors
+    from fpgaconvnet.transforms.weights_reloading import apply_random_weights_reloading
+    from fpgaconvnet.transforms.weights_reloading import apply_max_weights_reloading
+    from fpgaconvnet.transforms.weights_reloading import remove_weights_reloading_transform
+    from fpgaconvnet.transforms.weights_reloading import apply_weights_reloading_transform
 
     ## coarse transform
-    from fpgaconvnet_optimiser.transforms.coarse import apply_random_coarse_layer
-    from fpgaconvnet_optimiser.transforms.coarse import fix_coarse
+    from fpgaconvnet.transforms.coarse import apply_random_coarse_layer
+    from fpgaconvnet.transforms.coarse import fix_coarse
 
     # auxiliary layer functions
-    from fpgaconvnet_optimiser.models.partition.auxiliary import add_squeeze
-    from fpgaconvnet_optimiser.models.partition.auxiliary import remove_squeeze
+    from fpgaconvnet.models.partition.auxiliary import add_squeeze
+    from fpgaconvnet.models.partition.auxiliary import remove_squeeze
 
     # metrics
-    from fpgaconvnet_optimiser.models.partition.metrics import get_pipeline_depth
-    from fpgaconvnet_optimiser.models.partition.metrics import get_interval
-    from fpgaconvnet_optimiser.models.partition.metrics import get_latency
-    from fpgaconvnet_optimiser.models.partition.metrics import get_total_operations
-    from fpgaconvnet_optimiser.models.partition.metrics import get_bandwidth_in
-    from fpgaconvnet_optimiser.models.partition.metrics import get_bandwidth_out
-    from fpgaconvnet_optimiser.models.partition.metrics import get_resource_usage
+    from fpgaconvnet.models.partition.metrics import get_pipeline_depth
+    from fpgaconvnet.models.partition.metrics import get_interval
+    from fpgaconvnet.models.partition.metrics import get_latency
+    from fpgaconvnet.models.partition.metrics import get_total_operations
+    from fpgaconvnet.models.partition.metrics import get_bandwidth_in
+    from fpgaconvnet.models.partition.metrics import get_bandwidth_out
+    from fpgaconvnet.models.partition.metrics import get_resource_usage
 
     # update
-    from fpgaconvnet_optimiser.models.partition.update import update
+    from fpgaconvnet.models.partition.update import update
+
     def visualise(self, partition_index):
         cluster = pydot.Cluster(str(partition_index),label=f"partition: {partition_index}")
         # add clusters

@@ -1,4 +1,4 @@
-from fpgaconvnet_optimiser.models.modules import Module
+from fpgaconvnet.models.modules import Module
 import numpy as np
 
 class Split(Module):
@@ -18,7 +18,7 @@ class Split(Module):
         self.inputs = inputs
         self.coarse = coarse
 
-        
+
 
     '''
     FUNCTIONAL MODEL

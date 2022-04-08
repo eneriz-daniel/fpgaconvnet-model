@@ -1,1 +1,1 @@
-include fpgaconvnet_optimiser/coefficients/*.npy
+include fpgaconvnet/coefficients/*.npy

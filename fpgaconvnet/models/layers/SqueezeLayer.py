@@ -1,9 +1,8 @@
-from fpgaconvnet_optimiser.models.layers import Layer
-
 import pydot
 import numpy as np
 
-from fpgaconvnet_optimiser.models.modules import Squeeze
+from fpgaconvnet.models.layers import Layer
+from fpgaconvnet.models.modules import Squeeze
 
 class SqueezeLayer(Layer):
     def __init__(
@@ -21,8 +20,8 @@ class SqueezeLayer(Layer):
                 data_width=data_width)
 
         # initialise modules
-        self.modules["squeeze"] = Squeeze(self.rows, self.cols, self.channels, self.coarse_in,
-                                          self.coarse_out)
+        self.modules["squeeze"] = Squeeze(self.rows, self.cols,
+                self.channels, self.coarse_in, self.coarse_out)
 
     def layer_info(self,parameters,batch_size=1):
         Layer.layer_info(self, parameters, batch_size)
@@ -38,11 +37,14 @@ class SqueezeLayer(Layer):
         cluster = pydot.Cluster(name,label=name)
 
         # add squeeze module
-        cluster.add_node(pydot.Node( "_".join([name,"squeeze"]), label="squeeze" ))
+        cluster.add_node(pydot.Node( "_".join([name,"squeeze"]),
+            label="squeeze" ))
 
         # get nodes in and out
-        nodes_in  = [ "_".join([name,"squeeze"]) for i in range(self.streams_in()) ]
-        nodes_out = [ "_".join([name,"squeeze"]) for i in range(self.streams_out()) ]
+        nodes_in  = [ "_".join([name,"squeeze"]) \
+                for i in range(self.streams_in()) ]
+        nodes_out = [ "_".join([name,"squeeze"]) \
+                for i in range(self.streams_out()) ]
 
         # return module
         return cluster, nodes_in, nodes_out

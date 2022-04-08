@@ -4,8 +4,8 @@ import math
 import onnx
 import pydot
 
-from fpgaconvnet_optimiser.models.modules import ReLU
-from fpgaconvnet_optimiser.models.layers import Layer
+from fpgaconvnet.models.modules import ReLU
+from fpgaconvnet.models.layers import Layer
 
 class ReLULayer(Layer):
     def __init__(

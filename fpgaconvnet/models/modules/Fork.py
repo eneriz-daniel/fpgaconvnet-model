@@ -15,7 +15,7 @@ import sys
 from typing import Union, List
 from dataclasses import dataclass, field
 
-from fpgaconvnet_optimiser.models.modules import Module
+from fpgaconvnet.models.modules import Module
 
 @dataclass
 class Fork(Module):
