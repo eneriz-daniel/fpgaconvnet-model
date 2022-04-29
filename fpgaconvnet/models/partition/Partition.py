@@ -52,22 +52,6 @@ class Partition():
         self.max_streams_in     = self.ports_in*int(self.port_width/self.data_width)
         self.max_streams_out    = self.ports_out*int(self.port_width/self.data_width)
 
-    ## fine transform
-    from fpgaconvnet.transforms.fine import apply_random_fine_layer
-    from fpgaconvnet.transforms.fine import apply_complete_fine
-
-    ## weights reloading transform
-    from fpgaconvnet.transforms.weights_reloading import get_wr_layer
-    from fpgaconvnet.transforms.weights_reloading import get_weights_reloading_factors
-    from fpgaconvnet.transforms.weights_reloading import apply_random_weights_reloading
-    from fpgaconvnet.transforms.weights_reloading import apply_max_weights_reloading
-    from fpgaconvnet.transforms.weights_reloading import remove_weights_reloading_transform
-    from fpgaconvnet.transforms.weights_reloading import apply_weights_reloading_transform
-
-    ## coarse transform
-    from fpgaconvnet.transforms.coarse import apply_random_coarse_layer
-    from fpgaconvnet.transforms.coarse import fix_coarse
-
     # auxiliary layer functions
     from fpgaconvnet.models.partition.auxiliary import add_squeeze
     from fpgaconvnet.models.partition.auxiliary import remove_squeeze
@@ -146,3 +130,26 @@ class Partition():
 
             if self.graph.nodes[node]["type"] == LAYER_TYPE.Convolution:
                 self.graph.nodes[node]["hw"].fine = 1
+
+
+    def get_wr_layer(self):
+        # all transformable layer types
+        transformable_layers = [ LAYER_TYPE.Convolution, LAYER_TYPE.InnerProduct ]
+        # iterative function to find weights reloading layer
+        def _wr_layer(layer):
+            if self.graph.nodes[layer]['type'] == LAYER_TYPE.Concat:
+                return None
+            if self.graph.nodes[layer]['type'] in transformable_layers:
+                return layer
+            if self.graph.in_degree(layer) == 0:
+                return None
+            prev_node = graphs.get_prev_nodes(self.graph,layer)[0]
+            return _wr_layer( prev_node )
+        # start from the end
+        output_node = graphs.get_output_nodes(self.graph)[0]
+        if ( self.graph.in_degree(output_node) == 0 ) and ( self.graph.nodes[output_node]['type'] in transformable_layers ):
+            return output_node
+        else:
+            return _wr_layer( output_node )
+
+

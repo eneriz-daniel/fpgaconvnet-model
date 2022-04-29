@@ -7,38 +7,34 @@ import numpy as np
 import networkx as nx
 
 from google.protobuf import json_format
-import fpgaconvnet_optimiser.proto.fpgaconvnet_pb2
+import fpgaconvnet.proto.fpgaconvnet_pb2
 
-import fpgaconvnet_optimiser.tools.parser as parser
-import fpgaconvnet_optimiser.tools.graphs as graphs
-import fpgaconvnet_optimiser.tools.matrix as matrix
+import fpgaconvnet.tools.parser as parser
+import fpgaconvnet.tools.graphs as graphs
+import fpgaconvnet.tools.matrix as matrix
+import fpgaconvnet.tools.helper as helper
 
-import fpgaconvnet_optimiser.transforms.helper as helper
+import fpgaconvnet.tools.layer_enum
+from fpgaconvnet.tools.layer_enum import LAYER_TYPE
 
-from fpgaconvnet_optimiser.models.partition.Partition import Partition
-
-import fpgaconvnet_optimiser.tools.layer_enum
-from fpgaconvnet_optimiser.tools.layer_enum import LAYER_TYPE
-
-from fpgaconvnet_optimiser.models.layers import ConvolutionLayer
-from fpgaconvnet_optimiser.models.layers import InnerProductLayer
-from fpgaconvnet_optimiser.models.layers import PoolingLayer
-from fpgaconvnet_optimiser.models.layers import ReLULayer
-from fpgaconvnet_optimiser.models.layers import SqueezeLayer
+from fpgaconvnet.models.layers import ConvolutionLayer
+from fpgaconvnet.models.layers import InnerProductLayer
+from fpgaconvnet.models.layers import PoolingLayer
+from fpgaconvnet.models.layers import ReLULayer
+from fpgaconvnet.models.layers import SqueezeLayer
+from fpgaconvnet.models.partition.Partition import Partition
 
 class Network():
 
-<<<<<<< HEAD
-    def __init__(self, name, network_path, batch_size=1, freq=125, reconf_time=0.0, data_width=16, weight_width=8, acc_width=30, fuse_bn=True, rsc_allocation=1.0):
+    def __init__(self, name, network_path, batch_size=1, freq=125,
+            reconf_time=0.0, data_width=16, weight_width=8, acc_width=30,
+            fuse_bn=True, rsc_allocation=1.0):
 
         # empty transforms configuration
         self.transforms_config = {}
 
         ## percentage resource allocation
         self.rsc_allocation = rsc_allocation
-=======
-    def __init__(self, name, network_path, batch_size=1, freq=125, reconf_time=0.0, data_width=16, weight_width=8, acc_width=30, fuse_bn=True):
->>>>>>> 43f9572... initial commit
 
         ## bitwidths
         self.data_width     = data_width
@@ -96,6 +92,7 @@ class Network():
         self.update_partitions()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     from fpgaconvnet_optimiser.transforms.partition import check_parallel_block
     from fpgaconvnet_optimiser.transforms.partition import get_all_horizontal_splits
     from fpgaconvnet_optimiser.transforms.partition import get_all_vertical_splits
@@ -141,6 +138,34 @@ class Network():
     from fpgaconvnet_optimiser.models.network.validate import check_streams
     from fpgaconvnet_optimiser.models.network.validate import check_partitions
     from fpgaconvnet_optimiser.models.network.validate import check_memory_bandwidth
+=======
+    from fpgaconvnet.models.network.report import create_report
+
+    from fpgaconvnet.models.network.scheduler import get_partition_order
+    from fpgaconvnet.models.network.scheduler import get_input_base_addr
+    from fpgaconvnet.models.network.scheduler import get_output_base_addr
+    from fpgaconvnet.models.network.scheduler import get_partition_input_dependence
+    from fpgaconvnet.models.network.scheduler import get_partition_output_dependence
+    from fpgaconvnet.models.network.scheduler import get_scheduler
+    from fpgaconvnet.models.network.scheduler import get_schedule_csv
+    from fpgaconvnet.models.network.scheduler import check_scheduler
+
+    from fpgaconvnet.models.network.update import update_partitions
+    from fpgaconvnet.models.network.update import update_platform
+    from fpgaconvnet.models.network.update import update_coarse_in_out_partition
+
+    from fpgaconvnet.models.network.represent import get_model_input_node
+    from fpgaconvnet.models.network.represent import get_model_output_node
+    from fpgaconvnet.models.network.represent import save_all_partitions
+
+    from fpgaconvnet.models.network.validate import check_ports
+    from fpgaconvnet.models.network.validate import check_resources
+    from fpgaconvnet.models.network.validate import get_resources_bad_partitions
+    from fpgaconvnet.models.network.validate import check_workload
+    from fpgaconvnet.models.network.validate import check_streams
+    from fpgaconvnet.models.network.validate import check_partitions
+    from fpgaconvnet.models.network.validate import check_memory_bandwidth
+>>>>>>> 1868961... fixed bugs which linked to fpgaconvnet-optimiser repo
 
     def get_memory_usage_estimate(self):
 
@@ -191,7 +216,7 @@ class Network():
 
     def get_layer_hardware(self, layer_proto):
         # get layer type
-        layer_type = fpgaconvnet_optimiser.tools.layer_enum.from_proto_layer_type(layer_proto.type)
+        layer_type = fpgaconvnet.tools.layer_enum.from_proto_layer_type(layer_proto.type)
         # Convolution layer
         if layer_type == LAYER_TYPE.Convolution:
             return ConvolutionLayer(
@@ -263,7 +288,7 @@ class Network():
 
     def load_network(self, network_path):
         # load the prototxt file
-        partitions = fpgaconvnet_optimiser.proto.fpgaconvnet_pb2.partitions()
+        partitions = fpgaconvnet.proto.fpgaconvnet_pb2.partitions()
         with open(network_path, "r") as f:
             json_format.Parse(f.read(), partitions)
         # delete current partitions
@@ -274,7 +299,7 @@ class Network():
             graph = nx.DiGraph()
             for layer in partition.layers:
                 # get layer type and hardware
-                layer_type = fpgaconvnet_optimiser.tools.layer_enum.from_proto_layer_type(layer.type)
+                layer_type = fpgaconvnet.tools.layer_enum.from_proto_layer_type(layer.type)
                 layer_hw = self.get_layer_hardware(layer)
                 # add layer
                 graph.add_node( layer.name, type=layer_type, hw=layer_hw, inputs={} )

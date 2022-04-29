@@ -1,9 +1,11 @@
-import fpgaconvnet.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
-from google.protobuf.text_format import MessageToString
-from google.protobuf.json_format import MessageToJson
-import numpy as np
 import os
 import json
+
+import numpy as np
+from google.protobuf.text_format import MessageToString
+from google.protobuf.json_format import MessageToJson
+
+import fpgaconvnet.proto.fpgaconvnet_pb2 as fpgaconvnet_pb2
 
 import fpgaconvnet.tools.graphs as graphs
 import fpgaconvnet.tools.onnx_helper as onnx_helper

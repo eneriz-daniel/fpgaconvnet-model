@@ -1,7 +1,7 @@
 import json
 import copy
+
 import fpgaconvnet.tools.graphs as graphs
-from fpgaconvnet.transforms.helper import get_factors
 
 def update_partitions(self):
 
