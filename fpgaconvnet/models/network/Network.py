@@ -91,54 +91,24 @@ class Network():
         # update partitions
         self.update_partitions()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    from fpgaconvnet_optimiser.transforms.partition import check_parallel_block
-    from fpgaconvnet_optimiser.transforms.partition import get_all_horizontal_splits
-    from fpgaconvnet_optimiser.transforms.partition import get_all_vertical_splits
-    from fpgaconvnet_optimiser.transforms.partition import get_all_horizontal_merges
-    from fpgaconvnet_optimiser.transforms.partition import get_all_vertical_merges
-    from fpgaconvnet_optimiser.transforms.partition import split_horizontal
-    from fpgaconvnet_optimiser.transforms.partition import split_vertical
-    from fpgaconvnet_optimiser.transforms.partition import merge_horizontal
-    from fpgaconvnet_optimiser.transforms.partition import merge_vertical
-    from fpgaconvnet_optimiser.transforms.partition import split_horizontal_complete
-    from fpgaconvnet_optimiser.transforms.partition import split_vertical_complete
-    from fpgaconvnet_optimiser.transforms.partition import split_complete
-    from fpgaconvnet_optimiser.transforms.partition import merge_horizontal_complete
-    from fpgaconvnet_optimiser.transforms.partition import merge_vertical_complete
-    from fpgaconvnet_optimiser.transforms.partition import merge_complete
-    from fpgaconvnet_optimiser.transforms.partition import apply_random_partition
 
-=======
->>>>>>> 43f9572... initial commit
-    from fpgaconvnet_optimiser.models.network.report import create_report
+    from fpgaconvnet.transforms.partition import check_parallel_block
+    from fpgaconvnet.transforms.partition import get_all_horizontal_splits
+    from fpgaconvnet.transforms.partition import get_all_vertical_splits
+    from fpgaconvnet.transforms.partition import get_all_horizontal_merges
+    from fpgaconvnet.transforms.partition import get_all_vertical_merges
+    from fpgaconvnet.transforms.partition import split_horizontal
+    from fpgaconvnet.transforms.partition import split_vertical
+    from fpgaconvnet.transforms.partition import merge_horizontal
+    from fpgaconvnet.transforms.partition import merge_vertical
+    from fpgaconvnet.transforms.partition import split_horizontal_complete
+    from fpgaconvnet.transforms.partition import split_vertical_complete
+    from fpgaconvnet.transforms.partition import split_complete
+    from fpgaconvnet.transforms.partition import merge_horizontal_complete
+    from fpgaconvnet.transforms.partition import merge_vertical_complete
+    from fpgaconvnet.transforms.partition import merge_complete
+    from fpgaconvnet.transforms.partition import apply_random_partition
 
-    from fpgaconvnet_optimiser.models.network.scheduler import get_partition_order
-    from fpgaconvnet_optimiser.models.network.scheduler import get_input_base_addr
-    from fpgaconvnet_optimiser.models.network.scheduler import get_output_base_addr
-    from fpgaconvnet_optimiser.models.network.scheduler import get_partition_input_dependence
-    from fpgaconvnet_optimiser.models.network.scheduler import get_partition_output_dependence
-    from fpgaconvnet_optimiser.models.network.scheduler import get_scheduler
-    from fpgaconvnet_optimiser.models.network.scheduler import get_schedule_csv
-    from fpgaconvnet_optimiser.models.network.scheduler import check_scheduler
-
-    from fpgaconvnet_optimiser.models.network.update import update_partitions
-    from fpgaconvnet_optimiser.models.network.update import update_platform
-    from fpgaconvnet_optimiser.models.network.update import update_coarse_in_out_partition
-
-    from fpgaconvnet_optimiser.models.network.represent import get_model_input_node
-    from fpgaconvnet_optimiser.models.network.represent import get_model_output_node
-    from fpgaconvnet_optimiser.models.network.represent import save_all_partitions
-
-    from fpgaconvnet_optimiser.models.network.validate import check_ports
-    from fpgaconvnet_optimiser.models.network.validate import check_resources
-    from fpgaconvnet_optimiser.models.network.validate import get_resources_bad_partitions
-    from fpgaconvnet_optimiser.models.network.validate import check_workload
-    from fpgaconvnet_optimiser.models.network.validate import check_streams
-    from fpgaconvnet_optimiser.models.network.validate import check_partitions
-    from fpgaconvnet_optimiser.models.network.validate import check_memory_bandwidth
-=======
     from fpgaconvnet.models.network.report import create_report
 
     from fpgaconvnet.models.network.scheduler import get_partition_order
@@ -165,7 +135,6 @@ class Network():
     from fpgaconvnet.models.network.validate import check_streams
     from fpgaconvnet.models.network.validate import check_partitions
     from fpgaconvnet.models.network.validate import check_memory_bandwidth
->>>>>>> 1868961... fixed bugs which linked to fpgaconvnet-optimiser repo
 
     def get_memory_usage_estimate(self):
 
@@ -207,12 +176,13 @@ class Network():
         return float(self.batch_size)/self.get_latency(partition_list)
 
     def visualise(self, output_path):
-        g = pydot.Dot(graph_type='digraph')
+        g = pydot.Dot(graph_type='digraph', splines="ortho")
         for partition in self.partitions:
             partition_cluster = partition.visualise(self.partitions.index(partition))
             g.add_subgraph(partition_cluster)
         # save graph
-        g.write_png(output_path)
+        # g.write_png(output_path)
+        g.write_raw(output_path)
 
     def get_layer_hardware(self, layer_proto):
         # get layer type
