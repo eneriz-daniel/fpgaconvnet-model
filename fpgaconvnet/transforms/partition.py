@@ -5,20 +5,20 @@ The partitioning method is described in terms of horizontal and vertical splits.
 .. figure:: ../../figures/horizontal_vertical_split.png
 """
 
-from fpgaconvnet_optimiser.tools.layer_enum import LAYER_TYPE, from_onnx_op_type
-from fpgaconvnet_optimiser.transforms.helper import get_all_layers
+from fpgaconvnet.tools.layer_enum import LAYER_TYPE, from_onnx_op_type
+from fpgaconvnet.transforms.helper import get_all_layers
 from itertools import combinations, chain
 import random
-import fpgaconvnet_optimiser.tools.graphs as graphs
-import fpgaconvnet_optimiser.tools.matrix as matrix
+import fpgaconvnet.tools.graphs as graphs
+import fpgaconvnet.tools.matrix as matrix
 import copy
 import math
 
 def check_parallel_block(self, partition_index):
     """
     Checks whether the given partition is a parallel block. A parallel block is defined as a
-    partition where the input node is a `fpgaconvnet_optimiser.models.layers.SplitLayer` and
-    the output node is a `fpgaconvnet_optimiser.models.layers.ConcatLayer`.
+    partition where the input node is a `fpgaconvnet.models.layers.SplitLayer` and
+    the output node is a `fpgaconvnet.models.layers.ConcatLayer`.
 
     Parameters
     ----------

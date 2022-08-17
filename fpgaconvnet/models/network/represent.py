@@ -82,6 +82,6 @@ def save_all_partitions(self,filepath,input_output_from_model=True):
                 layer.bias_path    = self.partitions[i].graph.nodes[node]['inputs']['bias']
 
     # save in JSON format
-    with open(os.path.join(filepath,f"{self.name}.json"),"w") as f:
+    with open(filepath,"w") as f:
         f.write(MessageToJson(partitions,preserving_proto_field_name=True))
         #json.dump(MessageToJson(partitions),f)

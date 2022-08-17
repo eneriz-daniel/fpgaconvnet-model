@@ -12,9 +12,9 @@ Input and output channel dimension parallelism of Layers. For a convolution laye
 import logging
 import random
 
-import fpgaconvnet_optimiser.tools.graphs as graphs
-from fpgaconvnet_optimiser.tools.layer_enum import LAYER_TYPE
-from fpgaconvnet_optimiser.transforms.helper import get_factors
+import fpgaconvnet.tools.graphs as graphs
+from fpgaconvnet.tools.layer_enum import LAYER_TYPE
+from fpgaconvnet.transforms.helper import get_factors
 
 transformable_layers = [ LAYER_TYPE.Convolution, LAYER_TYPE.InnerProduct ]
 

@@ -5,10 +5,10 @@ Reduces on-chip memory usage by creating partial featuremaps across partition it
 import copy
 import random
 
-import fpgaconvnet_optimiser.tools.graphs as graphs
-import fpgaconvnet_optimiser.transforms.helper as helper
+import fpgaconvnet.tools.graphs as graphs
+import fpgaconvnet.transforms.helper as helper
 
-from fpgaconvnet_optimiser.tools.layer_enum import LAYER_TYPE
+from fpgaconvnet.tools.layer_enum import LAYER_TYPE
 
 transformable_layers = [ LAYER_TYPE.Convolution, LAYER_TYPE.InnerProduct ]
 
