@@ -1,4 +1,5 @@
 from typing import List
+import math
 import pydot
 import collections
 from google.protobuf.json_format import MessageToDict
@@ -101,8 +102,8 @@ class MultiPortLayer:
     @coarse_in.setter
     def coarse_in(self, val: List[int]) -> None:
         assert(len(val) == self.ports_in)
-        for i in range(val):
-            assert(val[i] in self.coarse_in_feasible(port_index=i))
+        # for i in range(val):
+        #     assert(val[i] in self.coarse_in_feasible(port_index=i))
         self._coarse_in = val
         self.coarse_out = val
         self.update()
@@ -110,8 +111,8 @@ class MultiPortLayer:
     @coarse_out.setter
     def coarse_out(self, val: List[int]) -> None:
         assert(len(val) == self.ports_out)
-        for i in range(val):
-            assert(val[i] in self.coarse_out_feasible(port_index=i))
+        # for i in range(val):
+        #     assert(val[i] in self.coarse_out_feasible(port_index=i))
         self._coarse_out = val
         self._coarse_in = val
         self.update()
@@ -391,12 +392,12 @@ class MultiPortLayer:
     def layer_info(self, parameters, batch_size=1):
         parameters.batch_size   = batch_size
         parameters.buffer_depth = self.buffer_depth
-        parameters.rows_in      = self.rows_in()
-        parameters.cols_in      = self.cols_in()
-        parameters.channels_in  = self.channels_in()
-        parameters.rows_out     = self.rows_out()
-        parameters.cols_out     = self.cols_out()
-        parameters.channels_out = self.channels_out()
+        parameters.rows_in.extend(map(self.rows_in, range(self.ports_in)))
+        parameters.cols_in.extend(map(self.cols_in, range(self.ports_in)))
+        parameters.channels_in.extend(map(self.channels_in, range(self.ports_in)))
+        parameters.rows_out.extend(map(self.rows_out, range(self.ports_out)))
+        parameters.cols_out.extend(map(self.cols_out, range(self.ports_out)))
+        parameters.channels_out.extend(map(self.channels_out, range(self.ports_out)))
         parameters.coarse_in    = self.streams_in()
         parameters.coarse_out   = self.streams_out()
 

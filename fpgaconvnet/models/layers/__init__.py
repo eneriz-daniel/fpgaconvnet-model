@@ -12,6 +12,7 @@ from .ReLULayer         import ReLULayer
 from .ConvolutionLayer  import ConvolutionLayer
 from .SqueezeLayer      import SqueezeLayer
 from .SplitLayer        import SplitLayer
+from .ConcatLayer       import ConcatLayer
 # from .LRNLayer          import LRNLayer
 # from .SoftMaxLayer      import SoftMaxLayer
 

@@ -18,7 +18,7 @@ class SplitLayer(MultiPortLayer):
             rows: int,
             cols: int,
             channels: int,
-            coarse: int,
+            coarse: int = 1,
             ports_out: int = 1,
             data_width: int = 16
         ):
@@ -89,21 +89,21 @@ class SplitLayer(MultiPortLayer):
     def coarse(self, val: int) -> None:
         self._coarse = val
         self._coarse_in = [val]
-        self.coarse_out = [val]
+        self.coarse_out = [val]*self.ports_out
         self.update()
 
     @coarse_in.setter
     def coarse_in(self, val: int) -> None:
         self._coarse = val
         self._coarse_in = [val]
-        self._coarse_out = [val]
+        self._coarse_out = [val]*self.ports_out
         self.update()
 
     @coarse_out.setter
     def coarse_out(self, val: int) -> None:
         self._coarse = val
         self._coarse_in = [val]
-        self._coarse_out = [val]
+        self._coarse_out = [val]*self.ports_out
         self.update()
 
     def rows_out(self, port_index=0) -> int:
@@ -116,7 +116,7 @@ class SplitLayer(MultiPortLayer):
         return self.channels[0]
 
     def layer_info(self,parameters,batch_size=1):
-        Layer.layer_info(self, parameters, batch_size)
+        MultiPortLayer.layer_info(self, parameters, batch_size)
         parameters.coarse = self.coarse
 
     def update(self):

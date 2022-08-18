@@ -126,6 +126,8 @@ class Network():
 
     from fpgaconvnet.models.network.represent import get_model_input_node
     from fpgaconvnet.models.network.represent import get_model_output_node
+    from fpgaconvnet.models.network.represent import get_stream_in_coarse
+    from fpgaconvnet.models.network.represent import get_stream_out_coarse
     from fpgaconvnet.models.network.represent import save_all_partitions
 
     from fpgaconvnet.models.network.validate import check_ports
