@@ -17,6 +17,9 @@ class SparseVectorDot(Module):
     regression_model: str = "linear_regression"
     weight_width: int = field(default=16, init=False)
     acc_width: int = field(default=32, init=False)
+    streams: int = 1
+    latency_mode: bool = False
+    data_packing: bool = False
 
     def rate_kernel_sparsity(self, fine):
         return 1.0/math.ceil(float(self.kernel_size[0]*self.kernel_size[1]*(1-self.sparsity))/fine)
@@ -44,9 +47,18 @@ class SparseVectorDot(Module):
         if self.backend == "hls":
             pass
         elif self.backend == "chisel":
+            if isinstance(self.kernel_size, int):
+                kernel_size_square = self.kernel_size*self.kernel_size
+            if isinstance(self.kernel_size, list):
+                kernel_size_square = self.kernel_size[0]*self.kernel_size[1]
             return {
                 "Logic_LUT" : np.array([
                     self.fine, self.data_width, self.weight_width,
+                    self.data_width*sum([ kernel_size_square - i for i in range(self.fine) ]),
+                    sum([ kernel_size_square - i for i in range(self.fine) ]),
+                    kernel_size_square,
+                    self.data_width*kernel_size_square,
+                    self.acc_width*kernel_size_square,
                     self.data_width*self.fine,
                     self.weight_width*self.fine,
                     self.acc_width*self.fine, # adder tree
@@ -67,6 +79,8 @@ class SparseVectorDot(Module):
                     int2bits(self.filters), # filter counter
                     int2bits(self.fine)+1, # tree buffer valid
                     self.acc_width*self.fine, # adder tree reg
+                    self.data_width*kernel_size_square, # input buffer + mac a
+                    self.acc_width*kernel_size_square, # mac b
                     # self.acc_width*(2**(int2bits(self.fine))), # tree buffer registers
                     # self.acc_width*int2bits(self.fine), # tree buffer
                     1,

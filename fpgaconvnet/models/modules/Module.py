@@ -67,6 +67,13 @@ class Module:
 
     def load_resource_coefficients(self, module_identifier):
 
+        # tag to get block and latency specific models
+        tag = "_"
+        if self.latency_mode:
+            tag += "latency_"
+        if self.data_packing:
+            tag += "block_"
+
         # get the cache path
         rsc_cache_path = os.path.dirname(__file__) + \
             f"/../../coefficients/{self.regression_model}/{self.backend}"
@@ -79,12 +86,12 @@ class Module:
                 case "linear_regression":
                     # get the coefficients from the cache path and load
                     coef_path = os.path.join(rsc_cache_path,
-                            f"{module_identifier}_{rsc_type}.npy".lower())
+                            f"{module_identifier}{tag}{rsc_type}.npy".lower())
                     self.rsc_coef[rsc_type] = np.load(coef_path)
                 case "xgboost" | "xgboost-kernel":
                     # get the coefficients from the cache path and load
                     model_path = os.path.join(rsc_cache_path,
-                            f"{module_identifier}_{rsc_type}.json".lower())
+                            f"{module_identifier}{tag}{rsc_type}.json".lower())
                     model = XGBRegressor(n_jobs=4)
                     model.load_model(model_path)
                     self.rsc_model[rsc_type] = model

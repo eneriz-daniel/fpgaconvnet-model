@@ -53,7 +53,9 @@ class ConvolutionLayer(Layer):
             sparsity: float = 0.0,
             block_floating_point: bool = False,
             backend: str = "chisel", # default to no bias for old configs
-            regression_model: str = "linear_regression"
+            regression_model: str = "linear_regression",
+            latency_mode: bool = False,
+            data_packing: bool = False,
         ):
 
         # initialise parent class
@@ -90,6 +92,10 @@ class ConvolutionLayer(Layer):
         # check if the layer is depthwise
         self.depthwise = (groups == channels) and (groups == filters)
 
+        # block and latency flags
+        self.data_packing = data_packing
+        self.latency_mode = latency_mode
+
         # backend flag
         assert backend in ["hls", "chisel"], f"{backend} is an invalid backend"
         self.backend = backend
@@ -98,15 +104,15 @@ class ConvolutionLayer(Layer):
         if self.backend == "hls":
             self.double_buffered = False
             self.stream_weights = False
-            self.data_packing = False
+            # self.data_packing = False
             self.use_uram = False
         elif self.backend == "chisel":
             self.double_buffered = False
             self.stream_weights = False
-            if self.sparsity == 0.0:
-                self.data_packing = True
-            else:
-                self.data_packing = False
+            # if self.sparsity == 0.0:
+            #     self.data_packing = True
+            # else:
+            #     self.data_packing = False
             self.use_uram = False
 
         # regression model
@@ -116,70 +122,90 @@ class ConvolutionLayer(Layer):
         self.modules["sliding_window"] = SlidingWindow(self.rows_in(), self.cols_in(),
                 self.channels_in()//(self.coarse_in*self.coarse_group), self.kernel_size,
                 self.stride, self.pad_top, self.pad_right, self.pad_bottom, self.pad_left,
-                backend=self.backend, regression_model=self.regression_model)
+                backend=self.backend, regression_model=self.regression_model,
+                data_packing=self.data_packing, latency_mode=self.latency_mode)
 
         if self.backend == "hls":
 
             self.modules["fork"] = Fork(self.rows_out(), self.cols_out(),
                     self.channels_in()//(self.coarse_in*self.coarse_group),
-                    self.kernel_size, self.coarse_out, backend=self.backend, regression_model=self.regression_model)
+                    self.kernel_size, self.coarse_out, backend=self.backend,
+                    regression_model=self.regression_model,
+                    data_packing=self.data_packing, latency_mode=self.latency_mode)
 
             self.modules["Conv"] = Conv(self.rows_out(), self.cols_out(),
                     self.channels_in()//(self.coarse_in*self.coarse_group),
                     self.filters//(self.coarse_out*self.coarse_group),
                     self.fine, self.kernel_size,
                     self.groups//self.coarse_group,
-                    backend=self.backend, regression_model=self.regression_model)
+                    backend=self.backend, regression_model=self.regression_model,
+                    data_packing=self.data_packing, latency_mode=self.latency_mode)
 
             self.modules["accum"] = Accum(self.rows_out(), self.cols_out(),
                     self.channels_in()//(self.coarse_in*self.coarse_group),
                     self.filters//(self.coarse_out*self.coarse_group),
                     self.groups//self.coarse_group,
-                    backend=self.backend, regression_model=self.regression_model)
+                    backend=self.backend, regression_model=self.regression_model,
+                    data_packing=self.data_packing, latency_mode=self.latency_mode)
 
         elif self.backend == "chisel":
 
-            self.modules["squeeze"] = Squeeze(self.rows_out(), self.cols_out(),
-                    self.channels_in()//(self.coarse_in*self.coarse_group),
-                    self.kernel_size[0]*self.kernel_size[1], self.fine,
-                    backend=self.backend, regression_model=self.regression_model)
+            if self.sparsity == 0.0:
+                self.modules["squeeze"] = Squeeze(self.rows_out(), self.cols_out(),
+                        self.channels_in()//(self.coarse_in*self.coarse_group),
+                        self.kernel_size[0]*self.kernel_size[1], self.fine,
+                        backend=self.backend, regression_model=self.regression_model,
+                        data_packing=self.data_packing, latency_mode=self.latency_mode)
 
             self.modules["fork"] = Fork(self.rows_out(), self.cols_out(),
                     self.channels_in()//(self.coarse_in*self.coarse_group),
-                    [self.fine, 1], self.coarse_out, backend=self.backend, regression_model=self.regression_model)
+                    [self.fine, 1], self.coarse_out, backend=self.backend,
+                    regression_model=self.regression_model,
+                    # data_packing=self.data_packing, latency_mode=self.latency_mode)
+                    data_packing=False, latency_mode=self.latency_mode)
 
             if self.sparsity == 0.0:
                 self.modules["vector_dot"] = VectorDot(self.rows_out(), self.cols_out(),
                         (self.channels*self.kernel_size[0]*self.kernel_size[1])//(
                             self.fine*self.coarse_in*self.coarse_group),
                         self.filters//(self.coarse_out*self.groups), self.fine,
-                        backend=self.backend, regression_model=self.regression_model)
+                        backend=self.backend, regression_model=self.regression_model,
+                        data_packing=self.data_packing, latency_mode=self.latency_mode)
 
                 self.modules["accum"] = Accum(self.rows_out(), self.cols_out(),
                         (self.kernel_size[0]*self.kernel_size[1]*self.channels_in())//(
                             self.fine*self.coarse_in*self.coarse_group),
                         self.filters//(self.coarse_out*self.groups), 1,
-                        backend=self.backend, regression_model=self.regression_model)
+                        backend=self.backend, regression_model=self.regression_model,
+                        data_packing=self.data_packing, latency_mode=self.latency_mode)
+
             else:
                 self.modules["vector_dot"] = SparseVectorDot(self.rows_out(), self.cols_out(),
                     self.channels_in()//(self.coarse_in*self.coarse_group),
                     self.filters//(self.coarse_out*self.groups),
                     self.kernel_size, self.sparsity, self.fine,
-                    backend=self.backend, regression_model=self.regression_model)
+                    backend=self.backend, regression_model=self.regression_model,
+                    data_packing=self.data_packing, latency_mode=self.latency_mode)
 
                 self.modules["accum"] = Accum(self.rows_out(), self.cols_out(),
                         self.channels_in()//(self.coarse_in*self.coarse_group),
                         self.filters//(self.coarse_out*self.groups), 1,
-                        backend=self.backend, regression_model=self.regression_model)
+                        backend=self.backend, regression_model=self.regression_model,
+                        data_packing=self.data_packing, latency_mode=self.latency_mode)
 
         self.modules["glue"] = Glue(self.rows_out(), self.cols_out(), 1,
-                int(self.filters/self.coarse_out), self.coarse_in, self.coarse_out, self.coarse_group,
-                backend=self.backend, regression_model=self.regression_model) # TODO
+                int(self.filters/self.coarse_out), self.coarse_in, 1, 1,
+                backend=self.backend, regression_model=self.regression_model,
+                # data_packing=self.data_packing, latency_mode=self.latency_mode)
+                data_packing=False, latency_mode=self.latency_mode)
 
-        self.modules["bias"] = Bias(self.rows_out(), self.cols_out(), 1, self.filters//(self.coarse_out*self.coarse_group),
-                backend=self.backend, regression_model=self.regression_model) # TODO
+        self.modules["bias"] = Bias(self.rows_out(), self.cols_out(), 1,
+                self.filters//(self.coarse_out),
+                backend=self.backend, regression_model=self.regression_model,
+                # data_packing=self.data_packing, latency_mode=self.latency_mode)
+                data_packing=False, latency_mode=self.latency_mode)
 
-        self.modules["shift_scale"] = ShiftScale(self.rows_out(), self.cols_out(), 1, self.filters//(self.coarse_out*self.coarse_group))
+        self.modules["shift_scale"] = ShiftScale(self.rows_out(), self.cols_out(), 1, self.filters//(self.coarse_out))
 
         # update modules
         self.update()
@@ -388,11 +414,12 @@ class ConvolutionLayer(Layer):
 
         if self.backend == "chisel":
             # squeeze
-            self.modules['squeeze'].rows     = self.rows_out()
-            self.modules['squeeze'].cols     = self.cols_out()
-            self.modules['squeeze'].channels = self.channels//(self.coarse_in*self.coarse_group)
-            self.modules['squeeze'].coarse_out = self.fine
-            self.modules['squeeze'].data_width = self.input_t.width
+            if self.sparsity == 0.0:
+                self.modules['squeeze'].rows     = self.rows_out()
+                self.modules['squeeze'].cols     = self.cols_out()
+                self.modules['squeeze'].channels = self.channels//(self.coarse_in*self.coarse_group)
+                self.modules['squeeze'].coarse_out = self.fine
+                self.modules['squeeze'].data_width = self.input_t.width
 
         # fork
         self.modules['fork'].rows     = self.rows_out()
@@ -456,8 +483,8 @@ class ConvolutionLayer(Layer):
         self.modules['glue'].cols       = self.cols_out()
         self.modules['glue'].filters    = self.filters//self.coarse_group
         self.modules['glue'].coarse_in  = self.coarse_in
-        self.modules['glue'].coarse_out = self.coarse_out
-        self.modules['glue'].coarse_group = self.coarse_group
+        # self.modules['glue'].coarse_out = self.coarse_out
+        # self.modules['glue'].coarse_group = self.coarse_group
         self.modules['glue'].data_width = self.acc_t.width
 
         # bias
@@ -473,7 +500,18 @@ class ConvolutionLayer(Layer):
         self.modules['shift_scale'].filters        = self.filters//(self.coarse_out*self.coarse_group)
         self.modules['shift_scale'].data_width     = self.output_t.width
         self.modules['shift_scale'].biases_width   = self.acc_t.width
-        
+
+        # update the streams if block mode
+        if self.data_packing:
+            self.modules['sliding_window'].streams = self.coarse_in*self.coarse_group
+            # self.modules['fork'].streams = self.coarse_in*self.coarse_group
+            if self.sparsity == 0.0:
+                self.modules['squeeze'].streams = self.coarse_in*self.coarse_out*self.coarse_group
+            self.modules['vector_dot'].streams = self.coarse_in*self.coarse_out*self.coarse_group
+            self.modules['accum'].streams = self.coarse_in*self.coarse_out*self.coarse_group
+            # self.modules['glue'].streams = self.coarse_out*self.coarse_group
+            # self.modules['bias'].streams = self.coarse_out*self.coarse_group
+
     def layer_info(self,parameters,batch_size=1):
         Layer.layer_info(self, parameters, batch_size)
         parameters.filters      = self.filters
@@ -574,17 +612,39 @@ class ConvolutionLayer(Layer):
             elif self.weight_t.width <= 4 and self.input_t.width <= 4:
                 vector_dot_rsc["DSP"] = vector_dot_rsc["DSP"]*0.25
 
+            # print("sw: ", sw_rsc)
+            # print("squeeze: ", squeeze_rsc)
+            # print("fork: ", fork_rsc)
+            # print("vd: ", vector_dot_rsc)
+            # print("acc: ", accum_rsc)
+            # print("glue: ", glue_rsc)
+            # print("bias: ", bias_rsc)
+            # print(shift_scale_rsc)
+
             # accumulate resource usage based on coarse factors
-            rsc = { rsc_type: (
-                sw_rsc[rsc_type]*self.coarse_in*self.coarse_group +
-                squeeze_rsc[rsc_type]*self.coarse_in*self.coarse_group +
-                fork_rsc[rsc_type]*self.coarse_in*self.coarse_group +
-                math.ceil(vector_dot_rsc[rsc_type]*self.coarse_in*self.coarse_out*self.coarse_group) +
-                accum_rsc[rsc_type]*self.coarse_in*self.coarse_out*self.coarse_group +
-                glue_rsc[rsc_type] +
-                bias_rsc[rsc_type]*self.coarse_out*self.coarse_group +
-                shift_scale_rsc[rsc_type]*self.coarse_out*self.coarse_group
-            ) for rsc_type in ["LUT", "FF", "DSP", "BRAM"] }
+            if self.data_packing:
+                rsc = { rsc_type: (
+                    sw_rsc[rsc_type] +
+                    squeeze_rsc[rsc_type] +
+                    # fork_rsc[rsc_type] +
+                    # fork_rsc[rsc_type]*self.coarse_in*self.coarse_group +
+                    vector_dot_rsc[rsc_type] +
+                    accum_rsc[rsc_type] +
+                    # glue_rsc[rsc_type]*self.coarse_out*self.coarse_group +
+                    # bias_rsc[rsc_type]*self.coarse_out*self.coarse_group +
+                    shift_scale_rsc[rsc_type]
+                ) for rsc_type in ["LUT", "FF", "DSP", "BRAM"] }
+            else:
+                rsc = { rsc_type: (
+                    sw_rsc[rsc_type]*self.coarse_in*self.coarse_group +
+                    squeeze_rsc[rsc_type]*self.coarse_in*self.coarse_group +
+                    fork_rsc[rsc_type]*self.coarse_in*self.coarse_group +
+                    math.ceil(vector_dot_rsc[rsc_type]*self.coarse_in*self.coarse_out*self.coarse_group) +
+                    accum_rsc[rsc_type]*self.coarse_in*self.coarse_out*self.coarse_group +
+                    glue_rsc[rsc_type]*self.coarse_out*self.coarse_group +
+                    bias_rsc[rsc_type]*self.coarse_out*self.coarse_group +
+                    shift_scale_rsc[rsc_type]*self.coarse_out*self.coarse_group
+                ) for rsc_type in ["LUT", "FF", "DSP", "BRAM"] }
 
         # weight usage
         weight_memory_depth = float((self.filters/self.groups)* \

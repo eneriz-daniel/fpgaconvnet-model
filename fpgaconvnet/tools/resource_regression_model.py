@@ -20,13 +20,16 @@ CHISEL_RSC_TYPES=["Logic_LUT", "LUT_RAM", "LUT_SR", "FF", "DSP", "BRAM36", "BRAM
 SERVER_DB="mongodb+srv://fpgaconvnet.hwnxpyo.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"
 
 class ModuleModel:
-    def __init__(self, identifier, module, regression_model, backend):
+    def __init__(self, identifier, module, regression_model, backend, block=False, latency=False):
 
         self.identifier = identifier
         self.module = module
         self.backend = backend
         assert regression_model in ["linear_regression", "xgboost", "xgboost-kernel"], f"regression model {regression_model} not supported"
         self.regression_model = regression_model
+
+        self.block = block
+        self.latency = latency
 
         if self.backend == "chisel":
             self.rsc_types = CHISEL_RSC_TYPES
@@ -38,6 +41,13 @@ class ModuleModel:
         self.coef = {k: [] for k in self.rsc_types}
         self.predict = {k: [] for k in self.rsc_types}
         self.actual = {k: [] for k in self.rsc_types}
+
+        # resource type tag
+        self.tag = "_"
+        if self.latency:
+            self.tag += "latency_"
+        if self.block:
+            self.tag += "block_"
 
     def get_module_parameter_list(self):
         match self.module:
@@ -87,15 +97,24 @@ class ModuleModel:
         if self.backend == "chisel":
             filter = {
                 "name" : self.identifier, # specific module
+                # "parameters.streams": 1, # only 16-bit input shapes
                 # "parameters.data_width": 16, # only 16-bit input shapes
+                # "parameters.kernel_size.0": 3, # only 16-bit input shapes
+                # "parameters.kernel_size.1": 3, # only 16-bit input shapes
+                # "parameters.stride.0": 1, # only 16-bit input shapes
+                # "parameters.stride.1": 1, # only 16-bit input shapes
                 # "time_stamp.commit_hash": "08bf16da9441d36e01d9cf1021e7602bf9e738fd", # specific commit hash
-                "time_stamp.commit_hash": "f50131b9dcc6ce25a737d77bd702892a58a5d57e", # specific commit hash
+                # "time_stamp.commit_hash": "f50131b9dcc6ce25a737d77bd702892a58a5d57e", # specific commit hash
+                # "time_stamp.commit_hash": "dfc3181861d326a8f9ec135266a7502c1c6c908e", # specific commit hash
+                "time_stamp.commit_hash": "5fc4bb02f478aa7d4d37927ee8aacddbc48b3f44", # specific commit hash
+                "latency": self.latency,
+                "block": self.block,
                 # filter resources
-                "resources.LUT" : { "$lt" : int(461000*0.8) },
-                "resources.FF"  : { "$lt" : int(504000*0.8) },
-                "resources.DSP" : { "$lt" : int(1728*0.8) },
-                "resources.BRAM36" : { "$lt" : int(312*0.8) },
-                "resources.BRAM18" : { "$lt" : int(624*0.8) },
+                # "resources.LUT" : { "$lt" : int(461000*0.8) },
+                # "resources.FF"  : { "$lt" : int(504000*0.8) },
+                # "resources.DSP" : { "$lt" : int(1728*0.8) },
+                # "resources.BRAM36" : { "$lt" : int(312*0.8) },
+                # "resources.BRAM18" : { "$lt" : int(624*0.8) },
             }
         else:
             raise NotImplementedError
@@ -134,7 +153,7 @@ class ModuleModel:
                     # iterate over resource types
                     self.coef = {}
                     for rsc_type in self.rsc_types:
-                        with open(f"{cache_path}/{self.module.lower()}_{rsc_type.lower()}.npy", "wb") as f:
+                        with open(f"{cache_path}/{self.module.lower()}{self.tag}{rsc_type.lower()}.npy", "wb") as f:
                             self.coef[rsc_type] = np.save(f)
                 case "xgboost" | "xgboost-kernel":
                     cache_path = os.path.dirname(__file__) + f"/../coefficients/{self.regression_model}/{self.backend}"
@@ -143,7 +162,7 @@ class ModuleModel:
                     self.coef = {}
                     for rsc_type in self.rsc_types:
                         model = XGBRegressor()
-                        model.load_model(f"{cache_path}/{self.module.lower()}_{rsc_type.lower()}.json")
+                        model.load_model(f"{cache_path}/{self.module.lower()}{self.tag}{rsc_type.lower()}.json")
                         self.coef[rsc_type] = model
 
         else:
@@ -156,6 +175,8 @@ class ModuleModel:
 
             # iterate over design points
             for point in self.parameters:
+                if not self.block:
+                    point["streams"] = 1
                 point["backend"] = self.backend
                 point_obj = namedtuple('ParameterPoint', point.keys())(*point.values())
                 for rsc_type in self.rsc_types:
@@ -226,10 +247,10 @@ class ModuleModel:
         for rsc_type in self.rsc_types:
             match self.regression_model:
                 case "linear_regression":
-                    filepath = os.path.join(outpath, f"{self.module}_{rsc_type}.npy".lower())
+                    filepath = os.path.join(outpath, f"{self.module}{self.tag}{rsc_type}.npy".lower())
                     np.save(filepath, self.coef[rsc_type])
                 case "xgboost" | "xgboost-kernel":
-                    filepath = os.path.join(outpath, f"{self.module}_{rsc_type}.json".lower())
+                    filepath = os.path.join(outpath, f"{self.module}{self.tag}{rsc_type}.json".lower())
                     self.coef[rsc_type].save_model(filepath)
 
     # def get_model_error(self):

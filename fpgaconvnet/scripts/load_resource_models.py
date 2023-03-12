@@ -11,33 +11,37 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_v
 # Available regression models: linear_regression, xgboost
 REGRESSOR = "linear_regression"
 
-# CHISEL_MODULES = {
-#         "Accum": "AccumFixed",
-#         "Fork": "ForkFixed",
-#         "Glue": "GlueFixed",
-#         # "SlidingWindow": "SlidingWindowFixed",
-#         "SlidingWindow3D": "SlidingTensorFixed",
-#         "Squeeze": "SqueezeFixed",
-#         "VectorDot": "VectorDotFixed",
-#         "Pool": "MaxPoolFixed",
-#         # "GlobalPool": "AveragePoolFixed",
-#         # "Bias": "BiasFixed"
-# }
+BLOCK=True
+LATENCY=False
 
 CHISEL_MODULES = {
-        "Accum": "Accum",
-        "Fork": "Fork",
-        "Glue": "Glue",
-        # "SlidingWindow": "SlidingWindowFixed",
-        "SlidingWindow3D": "SlidingTensor",
+        # "Accum": "Accum",
+        # "Fork": "Fork",
+        # "Glue": "Glue",
+        "SlidingWindow": "SlidingWindow",
+        # "SlidingWindow3D": "SlidingTensor",
         "Squeeze": "Squeeze",
         "VectorDot": "VectorDot",
-        "Pool": "MaxPool",
+        # "SparseVectorDot": "SparseVectorDot",
+        # "Pool": "MaxPool",
         # "GlobalPool": "AveragePoolFixed",
-        # "Bias": "BiasFixed"
+        # "Bias": "Bias"
 }
 
-# CHISEL_MODULES = [ "AveragePool" ]
+# CHISEL_MODULES = {
+#         "Accum": "Accum",
+#         # "Fork": "Fork",
+#         "Glue": "Glue",
+#         "SlidingWindow": "SlidingWindow",
+#         # "SlidingWindow3D": "SlidingTensor",
+#         "Squeeze": "Squeeze",
+#         "VectorDot": "VectorDot",
+#         "SparseVectorDot": "SparseVectorDot",
+#         "Pool": "MaxPool",
+#         # "GlobalPool": "AveragePoolFixed",
+#         # "Bias": "Bias"
+# }
+
 HLS_MODULES = []
 
 def save_npy(rsc_model, module):
@@ -182,7 +186,8 @@ for module, identifier in CHISEL_MODULES.items():
 
     print(f"{module} (chisel) ({REGRESSOR})")
     # create regression model
-    rsc_model = ModuleModel(identifier, module, REGRESSOR, "chisel")
+    rsc_model = ModuleModel(identifier, module,
+            REGRESSOR, "chisel", block=BLOCK, latency=LATENCY)
 
     # load data
     rsc_model.load_data_from_db()
@@ -209,6 +214,8 @@ for module, identifier in CHISEL_MODULES.items():
     attrs = {k : 1 for k, v in attrs[0][1].items() if v.init}
     attrs["backend"] = "chisel"
     attrs["regression_model"] = REGRESSOR
+    attrs["data_packing"] = BLOCK
+    attrs["latency_mode"] = LATENCY
     attrs.pop("pool_type", None) # bug fix for Pool
     m = hw_model(**attrs)
 

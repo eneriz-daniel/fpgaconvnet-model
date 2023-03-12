@@ -18,6 +18,9 @@ class GlobalPool(Module):
     backend: str = "chisel"
     regression_model: str = "linear_regression"
     acc_width: int = field(default=32, init=False)
+    streams: int = 1
+    latency_mode: bool = False
+    data_packing: bool = False
 
     def utilisation_model(self):
 

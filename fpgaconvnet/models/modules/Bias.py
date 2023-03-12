@@ -24,6 +24,9 @@ class Bias(Module):
     biases_width: int = field(default=16, init=False)
     backend: str = "chisel"
     regression_model: str = "linear_regression"
+    streams: int = 1
+    latency_mode: bool = False
+    data_packing: bool = False
 
     def channels_in(self):
         return self.filters

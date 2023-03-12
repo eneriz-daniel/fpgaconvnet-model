@@ -26,8 +26,8 @@ class Fork(Module):
     backend: str = "chisel"
     regression_model: str = "linear_regression"
     streams: int = 1
-    latency_mode: int = False
-    block: int = False
+    latency_mode: bool = False
+    data_packing: bool = False
 
     def __post_init__(self):
 

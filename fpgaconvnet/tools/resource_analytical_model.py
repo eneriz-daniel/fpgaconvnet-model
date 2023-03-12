@@ -61,6 +61,7 @@ def queue_lutram_resource_model(depth, width):
 
     # return the ceiling
     return math.ceil((width+1)/lutram_width) * math.ceil(depth/lutram_depth)
+    return math.ceil((width)/16) * math.ceil(depth/32)
 
 def dsp_multiplier_resource_model(multiplicand_width, multiplier_width, dsp_type="DSP48E1"):
     #https://github.com/Xilinx/finn/blob/4fee6ffd8e13f91314ec9086e9ce9b2ea9de15c7/src/finn/custom_op/fpgadataflow/streamingfclayer_batch.py#L368,

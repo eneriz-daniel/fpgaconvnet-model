@@ -17,6 +17,9 @@ class Concat(Module):
     channels: List[int]
     ports_in: int
     biases_width: int = field(default=16, init=False)
+    streams: int = 1
+    latency: bool = False
+    block: bool = False
 
     def channels_in(self, port_index=0):
         return self.channels[port_index]

@@ -28,8 +28,8 @@ class Accum(Module):
     backend: str = "chisel"
     regression_model: str = "linear_regression"
     streams: int = 1
-    latency_mode: int = False
-    block: int = False
+    latency_mode: bool = False
+    data_packing: bool = False
 
     def channels_in(self):
         return (self.channels*self.filters)//self.groups
@@ -99,7 +99,6 @@ class Accum(Module):
                 ]),
                 "LUT_SR"    : np.array([0]),
                 "FF"        : np.array([
-                    self.data_width,  # input val cache
                     self.streams*self.data_width,  # input val cache
                     int2bits(self.channels), # channel_cntr
                     int2bits(self.filters), # filter cntr
