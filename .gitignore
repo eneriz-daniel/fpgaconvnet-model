@@ -17,6 +17,8 @@ onnx/
 
 .eggs/
 
+*.egg-info/
+
 docs/fpgaconvnet_optimiser/
 
 build/
@@ -28,3 +30,5 @@ dist/
 examples/models
 
 **.dcp
+
+fpgaconvnet/hls

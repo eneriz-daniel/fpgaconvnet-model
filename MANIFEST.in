@@ -1,1 +1,4 @@
 include fpgaconvnet/coefficients/*.npy
+include fpgaconvnet/hls/scripts/hls/*.tcl
+include fpgaconvnet/hls/hardware/*.hpp
+graft fpgaconvnet/hls/hardware/hlslib/include

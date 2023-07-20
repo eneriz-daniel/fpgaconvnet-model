@@ -27,13 +27,13 @@ setuptools.setup(
         "pyyaml>=5.1.0",
         "scipy>=1.2.1",
         "torchvision>=0.8.2",
-        "onnx==1.8.1",
-        "onnxruntime==1.7.0",
+        "onnx>=1.8.1", # ! Why? Originally fixed to 1.8.1
+        "onnxruntime>1.7.0", # ! Why? Originally fixed to 1.7.0
         "graphviz>=0.16",
         "pydot>=1.4.2",
-        "onnxoptimizer==0.2.6",
+        "onnxoptimizer>0.2.6", # ! Why? Originally fixed to 0.2.6
         "ddt>=1.4.2",
-        "sklearn",
+        "scikit-learn",
         "matplotlib",
         "coverage==5.5",
         "pyparsing<3"
