@@ -168,12 +168,14 @@ class ConvolutionLayer(ConvolutionLayerBase):
 
         # Total
         return {
-            "LUT"  :  sw_rsc['LUT']*self.coarse_in*self.coarse_group +
+            "LUT"  :  round(0.55*(
+                      sw_rsc['LUT']*self.coarse_in*self.coarse_group +
                       fork_rsc['LUT']*self.coarse_in*self.coarse_group +
                       conv_rsc['LUT']*self.coarse_in*self.coarse_out*self.coarse_group +
                       accum_rsc['LUT']*self.coarse_in*self.coarse_out*self.coarse_group +
                       glue_rsc['LUT']*self.coarse_group +
-                      bias_rsc['LUT']*self.coarse_out,
+                      bias_rsc['LUT']*self.coarse_out
+                      )),
             "FF"   :  sw_rsc['FF']*self.coarse_in*self.coarse_group +
                       fork_rsc['FF']*self.coarse_in*self.coarse_group +
                       conv_rsc['FF']*self.coarse_in*self.coarse_out*self.coarse_group +
